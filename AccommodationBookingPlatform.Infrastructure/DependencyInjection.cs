@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AccommodationBookingPlatform.Infrastructure.Auth.Jwt;
+using AccommodationBookingPlatform.Infrastructure.Presistence;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AccommodationBookingPlatform.Infrastructure
@@ -10,8 +12,8 @@ namespace AccommodationBookingPlatform.Infrastructure
     IConfiguration config)
         {
             ArgumentNullException.ThrowIfNull(config);
-            //services.AddPersistenceInfrastructure(config)
-            //  .AddAuthInfrastructure()
+            services.AddPersistenceInfrastructure(config)
+              .AddAuthInfrastructure();
             //  .AddEmailInfrastructure()
             //  .AddPdfInfrastructure()
             //  .AddTransient<IDateTimeProvider, DateTimeProvider>();

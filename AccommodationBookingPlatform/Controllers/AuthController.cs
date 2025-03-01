@@ -1,9 +1,9 @@
 ﻿using AccommodationBookingPlatform.Domain;
+using AccommodationBookingPlatform.DTOs.Auth;
 using Application.Users.Login;
 using Application.Users.Register;
 using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AccommodationBookingPlatform.Controllers

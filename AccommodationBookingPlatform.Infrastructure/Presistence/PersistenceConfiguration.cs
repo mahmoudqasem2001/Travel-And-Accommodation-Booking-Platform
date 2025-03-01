@@ -1,7 +1,9 @@
-﻿using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
+﻿using AccommodationBookingPlatform.Domain.Entities;
+using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
 using AccommodationBookingPlatform.Infrastructure.Presistence.DbContexts;
 using AccommodationBookingPlatform.Infrastructure.Presistence.Repositories;
 using Domain.Interfaces.Persistence;
+using Domain.Interfaces.Persistence.Repositories;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -21,7 +23,7 @@ public static class PersistenceConfiguration
         services.AddDbContext(configuration)
           .AddPasswordHashing()
           .AddRepositories();
-        //  .AddImageService();
+        // .AddImageService();
 
         return services;
     }
@@ -44,7 +46,7 @@ public static class PersistenceConfiguration
 
     private static IServiceCollection AddPasswordHashing(this IServiceCollection services)
     {
-        //services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
         return services;
     }
@@ -55,10 +57,11 @@ public static class PersistenceConfiguration
           //.AddScoped<IAmenityRepository, AmenityRepository>()
           //.AddScoped<IBookingRepository, BookingRepository>()
           //.AddScoped<ICityRepository, CityRepository>()
-          //.AddScoped<IDiscountRepository, DiscountRepository>()
+          //.AddSc
+          //oped<IDiscountRepository, DiscountRepository>()
           //.AddScoped<IHotelRepository, HotelRepository>()
           //.AddScoped<IImageRepository, ImageRepository>()
-          //.AddScoped<IOwnerRepository, OwnerRepository>()
+          .AddScoped<IOwnerRepository, OwnerRepository>()
           .AddScoped<IRoleRepository, RoleRepository>()
           //.AddScoped<IRoomClassRepository, RoomClassRepository>()
           //.AddScoped<IRoomRepository, RoomRepository>()
