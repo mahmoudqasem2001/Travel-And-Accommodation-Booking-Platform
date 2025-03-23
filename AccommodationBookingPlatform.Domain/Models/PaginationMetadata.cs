@@ -1,4 +1,4 @@
-namespace Domain.Models
+namespace AccommodationBookingPlatform.Domain.Models
 {
     public record PaginationMetadata(
       int TotalItemCount,
