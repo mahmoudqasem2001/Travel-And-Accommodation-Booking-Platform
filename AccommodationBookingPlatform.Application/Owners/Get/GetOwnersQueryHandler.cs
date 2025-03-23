@@ -39,10 +39,7 @@ public class GetOwnersQueryHandler : IRequestHandler<GetOwnersQuery, PaginatedLi
         return _mapper.Map<PaginatedList<OwnerResponse>>(owners);
     }
 
-    private static Expression<Func<Owner, bool>> GetSearchExpression(string? searchTerm)
-    {
-        return searchTerm is null
+    private static Expression<Func<Owner, bool>> GetSearchExpression(string? searchTerm) => searchTerm is null
           ? _ => true
           : o => o.FirstName.Contains(searchTerm) || o.LastName.Contains(searchTerm);
-    }
 }
