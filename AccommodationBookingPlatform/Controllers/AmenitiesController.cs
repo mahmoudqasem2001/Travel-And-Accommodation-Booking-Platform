@@ -35,7 +35,7 @@ public class AmenitiesController(ISender mediator, IMapper mapper) : ControllerB
 
         return Ok(amenities.Items);
     }
-
+    
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(AmenityResponse), StatusCodes.Status200OK)]
