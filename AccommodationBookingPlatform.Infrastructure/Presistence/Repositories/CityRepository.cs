@@ -1,4 +1,5 @@
 using AccommodationBookingPlatform.Domain.Entities;
+using AccommodationBookingPlatform.Domain.Enums;
 using AccommodationBookingPlatform.Domain.Models;
 using AccommodationBookingPlatform.Infrastructure.Presistence.DbContexts;
 using AccommodationBookingPlatform.Infrastructure.Presistence.Extensions;
@@ -91,37 +92,25 @@ public class CityRepository(HotelBookingDbContext context) : ICityRepository
         context.Cities.Update(city);
     }
 
-    public async Task<IEnumerable<City>> GetMostVisitedAsync(int count,
-      CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<City>> GetMostVisitedAsync(int count, CancellationToken cancellationToken = default)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
 
-        //var mostVisitedCityIdsCte = Linq.LinqExtensions
-        //  .AsCte(context.Bookings
-        //    .GroupBy(b => b.Hotel.CityId)
-        //    .OrderByDescending(g => g.Count())
-        //    .Take(count).Select(g => g.Key));
+        // Get the most visited city IDs by counting bookings per city
+        var mostVisitedCityIds = await context.Bookings
+            .GroupBy(b => b.Hotel.CityId)
+            .Select(g => new { CityId = g.Key, BookingCount = g.Count() })
+            .OrderByDescending(g => g.BookingCount)
+            .Take(count)
+            .Select(g => g.CityId)
+            .ToListAsync(cancellationToken);
 
-        //var mostVisitedCitiesQuery =
-        //  from c in context.Cities.ToLinqToDB()
-        //  join cId in mostVisitedCityIdsCte on c.Id equals cId
-        //  join i in context.Images.ToLinqToDB()
-        //    on c.Id equals i.EntityId into images
-        //  from img in images.DefaultIfEmpty()
-        //  where img.Type == ImageType.Thumbnail
-        //  select new { City = c, Thumbnail = img };
+        var mostVisitedCities = await context.Cities
+            .Where(c => mostVisitedCityIds.Contains(c.Id))
+            .Include(c => c.Thumbnail)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
-        //var mostVisitedCities = await mostVisitedCitiesQuery
-        //  .AsNoTracking()
-        //  .ToListAsync(cancellationToken);
-
-        //return mostVisitedCities.Select(c =>
-        //{
-        //    c.City.Thumbnail = c.Thumbnail;
-
-        //    return c.City;
-        //}); ;
-
-        return [];
+        return mostVisitedCities;
     }
 }
