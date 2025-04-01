@@ -2,6 +2,8 @@
 using AccommodationBookingPlatform.Middlewares;
 using AccommodationBookingPlatform.Services;
 using Domain.Interfaces.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.OpenApi.Models;
@@ -34,7 +36,6 @@ namespace AccommodationBookingPlatform
                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
               });
 
-            //services.AddDateOnlyTimeOnlyStringConverters();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
@@ -54,11 +55,7 @@ namespace AccommodationBookingPlatform
             {
                 setup.SwaggerDoc("v1", new OpenApiInfo { Title = "Hotel booking API", Version = "v1" });
 
-                //var xmlCommentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-
-                //var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFile);
-
-                //setup.IncludeXmlComments(xmlCommentsFullPath);
+              
 
                 setup.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -85,7 +82,6 @@ namespace AccommodationBookingPlatform
         }
               });
 
-                //setup.UseDateOnlyTimeOnlyStringConverters();
             });
 
             return services;
@@ -93,27 +89,26 @@ namespace AccommodationBookingPlatform
 
         private static IServiceCollection AddApiVersioning(this IServiceCollection services)
         {
-            //services.AddApiVersioning(setupAction =>
-            //{
-            //    setupAction.AssumeDefaultVersionWhenUnspecified = true;
+            services.AddApiVersioning(setupAction =>
+            {
+                setupAction.AssumeDefaultVersionWhenUnspecified = true;
 
-            //    setupAction.DefaultApiVersion = new ApiVersion(1, 0);
+                setupAction.DefaultApiVersion = new ApiVersion(1, 0);
 
-            //    setupAction.ReportApiVersions = true;
+                setupAction.ReportApiVersions = true;
 
-            //    setupAction.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+                setupAction.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
 
-            //    setupAction.UnsupportedApiVersionStatusCode = StatusCodes.Status406NotAcceptable;
-            //}).AddApiExplorer(options => { options.GroupNameFormat = "'v'VVV"; });
+            });
 
             return services;
         }
 
         private static IServiceCollection AddFluentValidation(this IServiceCollection services)
         {
-            //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-            //services.AddFluentValidationAutoValidation();
+            services.AddFluentValidationAutoValidation();
 
             return services;
         }
