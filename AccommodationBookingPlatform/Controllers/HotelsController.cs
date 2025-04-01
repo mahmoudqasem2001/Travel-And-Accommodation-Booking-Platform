@@ -114,7 +114,6 @@ public class HotelsController(ISender mediator, IMapper mapper) : ControllerBase
     }
 
 
-    /// <response code="409">If there is an hotel in the same geographical location (longitude and latitude)</response>
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -154,7 +153,6 @@ public class HotelsController(ISender mediator, IMapper mapper) : ControllerBase
     }
 
 
-    /// <response code="409">If there are room classes in the hotel.</response>
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -175,7 +173,6 @@ public class HotelsController(ISender mediator, IMapper mapper) : ControllerBase
     }
 
 
-    /// <response code="404">If the hotel specified by ID is not found.</response>
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -196,7 +193,6 @@ public class HotelsController(ISender mediator, IMapper mapper) : ControllerBase
     }
 
  
-    /// <response code="404">If the hotel specified by ID is not found.</response>
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -64,7 +64,6 @@ public class RoomsController(ISender mediator, IMapper mapper) : ControllerBase
     }
 
     
-    /// <response code="409">If there is a room with the same number in the room class of the room class.</response>
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -86,7 +85,6 @@ public class RoomsController(ISender mediator, IMapper mapper) : ControllerBase
     }
 
 
-    /// <response code="409">If there is a room with the same number in the room class of the room class.</response>
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -112,7 +110,6 @@ public class RoomsController(ISender mediator, IMapper mapper) : ControllerBase
     }
 
 
-    /// <response code="409">If there are bookings to the room.</response>
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

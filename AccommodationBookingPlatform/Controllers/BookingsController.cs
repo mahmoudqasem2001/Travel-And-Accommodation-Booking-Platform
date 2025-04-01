@@ -22,10 +22,6 @@ namespace AccommodationBookingPlatform.Controllers;
 public class BookingsController(ISender mediator, IMapper mapper) : ControllerBase
 {
 
-    /// <response code="400">
-    ///   If the request data is invalid or The provided rooms does not belong to the same
-    ///   hotel or one of the rooms is not available in the specified times of check-in and check-out.
-    /// </response>
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
