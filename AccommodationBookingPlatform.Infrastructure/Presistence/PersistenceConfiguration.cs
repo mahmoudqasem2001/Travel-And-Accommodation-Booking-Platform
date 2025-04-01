@@ -2,10 +2,11 @@
 using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
 using AccommodationBookingPlatform.Infrastructure.Presistence.DbContexts;
 using AccommodationBookingPlatform.Infrastructure.Presistence.Repositories;
+using AccommodationBookingPlatform.Infrastructure.Presistence.Services;
+using AccommodationBookingPlatform.Infrastructure.Presistence.Services.Images;
 using Domain.Interfaces.Persistence;
 using Domain.Interfaces.Persistence.Repositories;
 using Infrastructure.Persistence.Repositories;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,8 +23,8 @@ public static class PersistenceConfiguration
     {
         services.AddDbContext(configuration)
           .AddPasswordHashing()
-          .AddRepositories();
-        // .AddImageService();
+          .AddRepositories()
+          .AddImageService();
 
         return services;
     }
@@ -36,7 +37,6 @@ public static class PersistenceConfiguration
 
             options.UseSqlServer(configuration.GetConnectionString("SqlServer"),
             optionsBuilder => optionsBuilder.EnableRetryOnFailure(5));
-          //.UseLinqToDB();
         });
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -54,33 +54,20 @@ public static class PersistenceConfiguration
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services
-          //.AddScoped<IAmenityRepository, AmenityRepository>()
-          //.AddScoped<IBookingRepository, BookingRepository>()
-          //.AddScoped<ICityRepository, CityRepository>()
-          //.AddSc
-          //oped<IDiscountRepository, DiscountRepository>()
-          //.AddScoped<IHotelRepository, HotelRepository>()
-          //.AddScoped<IImageRepository, ImageRepository>()
+          .AddScoped<IAmenityRepository, AmenityRepository>()
+          .AddScoped<IBookingRepository, BookingRepository>()
+          .AddScoped<ICityRepository, CityRepository>()
+          .AddScoped<IDiscountRepository, DiscountRepository>()
+          .AddScoped<IHotelRepository, HotelRepository>()
+          .AddScoped<IImageRepository, ImageRepository>()
           .AddScoped<IOwnerRepository, OwnerRepository>()
           .AddScoped<IRoleRepository, RoleRepository>()
-          //.AddScoped<IRoomClassRepository, RoomClassRepository>()
-          //.AddScoped<IRoomRepository, RoomRepository>()
-          .AddScoped<IUserRepository, UserRepository>();
-        //.AddScoped<IReviewRepository, ReviewRepository>();
+          .AddScoped<IRoomClassRepository, RoomClassRepository>()
+          .AddScoped<IRoomRepository, RoomRepository>()
+          .AddScoped<IUserRepository, UserRepository>()
+          .AddScoped<IReviewRepository, ReviewRepository>();
 
         return services;
     }
 
-    public static IApplicationBuilder Migrate(this IApplicationBuilder app)
-    {
-        using var scope = app.ApplicationServices.CreateScope();
-
-        using var context = scope.ServiceProvider.GetRequiredService<HotelBookingDbContext>();
-
-        //if (context.Database.GetPendingMigrations().Any()) {
-        //  context.Database.Migrate();
-        //}
-
-        return app;
-    }
 }
