@@ -37,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AccommodationBookingPlatform.Application\AccommodationBookingPlatform.Application.csproj" />
     <ProjectReference Include="..\AccommodationBookingPlatform.Domain\AccommodationBookingPlatform.Domain.csproj" />
     <ProjectReference Include="..\AccommodationBookingPlatform.Shared\AccommodationBookingPlatform.Shared.csproj" />
   </ItemGroup>

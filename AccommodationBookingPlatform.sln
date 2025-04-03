@@ -1,15 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35506.116 d17.12
+VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccommodationBookingPlatform", "AccommodationBookingPlatform\AccommodationBookingPlatform.csproj", "{10CDB1C5-A4C4-43C0-B864-DFB3A53DD94F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccommodationBookingPlatform.API", "AccommodationBookingPlatform\AccommodationBookingPlatform.API.csproj", "{10CDB1C5-A4C4-43C0-B864-DFB3A53DD94F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccommodationBookingPlatform.Application", "AccommodationBookingPlatform.Application\AccommodationBookingPlatform.Application.csproj", "{6EDB5D94-0CC1-4CDE-ADDE-3A669C2D82D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccommodationBookingPlatform.Infrastructure", "AccommodationBookingPlatform.Infrastructure\AccommodationBookingPlatform.Infrastructure.csproj", "{109AED12-4F56-43E1-A164-D2F4181EFFDC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccommodationBookingPlatform.Domain", "AccommodationBookingPlatform.Domain\AccommodationBookingPlatform.Domain.csproj", "{2A4BDDBF-BA63-4831-BD01-AAAAC6D447E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccommodationBookingPlatform.Shared", "AccommodationBookingPlatform.Shared\AccommodationBookingPlatform.Shared.csproj", "{852AF6E2-AD61-4A11-86CB-9535BD96659C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccommodationBookingPlatform.Tests", "AccommodationBookingPlatform.Tests\AccommodationBookingPlatform.Tests.csproj", "{3F094A81-DAB8-4FE0-A8B5-85B37D511D38}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{2A4BDDBF-BA63-4831-BD01-AAAAC6D447E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A4BDDBF-BA63-4831-BD01-AAAAC6D447E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A4BDDBF-BA63-4831-BD01-AAAAC6D447E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{852AF6E2-AD61-4A11-86CB-9535BD96659C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{852AF6E2-AD61-4A11-86CB-9535BD96659C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{852AF6E2-AD61-4A11-86CB-9535BD96659C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{852AF6E2-AD61-4A11-86CB-9535BD96659C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F094A81-DAB8-4FE0-A8B5-85B37D511D38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F094A81-DAB8-4FE0-A8B5-85B37D511D38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F094A81-DAB8-4FE0-A8B5-85B37D511D38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F094A81-DAB8-4FE0-A8B5-85B37D511D38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
