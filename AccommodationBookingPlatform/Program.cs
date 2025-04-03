@@ -1,8 +1,6 @@
 using AccommodationBookingPlatform;
 using AccommodationBookingPlatform.Application;
-using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Services;
 using AccommodationBookingPlatform.Infrastructure;
-using Domain.Interfaces.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Serilog;
 
@@ -19,9 +17,6 @@ builder.Services
   .AddApplication()
   .AddInfrastructure(builder.Configuration);
 
-var serviceProvider = builder.Services.BuildServiceProvider();
-var registeredServices = serviceProvider.GetServices<IEmailService>();
-Console.WriteLine($"---------------------------------Registered IDateTimeProvider count: {registeredServices.Count()}");
 
 var app = builder.Build();
 
