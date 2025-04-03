@@ -152,4 +152,10 @@ This guide provides instructions on setting up an existing ASP.NET API project.
 
    The Swagger UI can be accessed at `http://localhost:8080/swagger`.
 
+   5. **Admin Credintials**
+  
+      - Email: admin@bookinghotel.com
+      - Password: Admin1234
+      
+
 
