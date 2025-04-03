@@ -88,17 +88,14 @@ public class BookingRepository(HotelBookingDbContext context) : IBookingReposito
      int count, CancellationToken cancellationToken = default)
     {
         var recentBookings = await context.Bookings
-            .Where(b => b.GuestId == guestId)
-            .OrderByDescending(b => b.CheckInDateUtc)
-            .GroupBy(b => b.HotelId)
-            .Select(g => g.First())
-            .Take(count)
-            .Include(b => b.Hotel)
-            .ThenInclude(h => h.City)
-            .Include(b => b.Hotel)
-            .ThenInclude(h => h.Gallery.Where(i => i.Type == ImageType.Thumbnail))
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+       .Where(b => b.GuestId == guestId)
+       .Include(b => b.Hotel)
+       .OrderByDescending(b => b.CheckInDateUtc)
+       .GroupBy(b => b.HotelId)
+       .Select(g => g.First()) 
+       .AsNoTracking()
+       .ToListAsync(cancellationToken);
+
 
         return recentBookings;
     }

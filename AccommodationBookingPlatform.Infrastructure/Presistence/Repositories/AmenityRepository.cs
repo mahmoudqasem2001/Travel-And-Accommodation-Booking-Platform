@@ -1,11 +1,11 @@
 ﻿using System.Linq.Expressions;
 using AccommodationBookingPlatform.Domain.Entities;
+using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
 using AccommodationBookingPlatform.Domain.Models;
 using AccommodationBookingPlatform.Infrastructure.Presistence.DbContexts;
 using AccommodationBookingPlatform.Infrastructure.Presistence.Extensions;
 using AccommodationBookingPlatform.Infrastructure.Presistence.Helpers;
 using Domain.Exceptions;
-using Domain.Interfaces.Persistence.Repositories;
 using Domain.Messages;
 using Microsoft.EntityFrameworkCore;
 
