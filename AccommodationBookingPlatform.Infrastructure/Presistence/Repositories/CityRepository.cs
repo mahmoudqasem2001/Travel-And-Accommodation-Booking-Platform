@@ -1,15 +1,15 @@
 using AccommodationBookingPlatform.Domain.Entities;
-using AccommodationBookingPlatform.Domain.Enums;
 using AccommodationBookingPlatform.Domain.Models;
 using AccommodationBookingPlatform.Infrastructure.Presistence.DbContexts;
 using AccommodationBookingPlatform.Infrastructure.Presistence.Extensions;
 using AccommodationBookingPlatform.Infrastructure.Presistence.Helpers;
+using AccommodationBookingPlatform.Application;
 using Domain.Exceptions;
-using Domain.Interfaces.Persistence.Repositories;
 using Domain.Messages;
 using Domain.Models;
 using System.Data.Entity;
 using System.Linq.Expressions;
+using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
 
 namespace AccommodationBookingPlatform.Infrastructure.Presistence.Repositories;
 
@@ -96,20 +96,18 @@ public class CityRepository(HotelBookingDbContext context) : ICityRepository
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
 
-        // Get the most visited city IDs by counting bookings per city
         var mostVisitedCityIds = await context.Bookings
-            .GroupBy(b => b.Hotel.CityId)
-            .Select(g => new { CityId = g.Key, BookingCount = g.Count() })
-            .OrderByDescending(g => g.BookingCount)
-            .Take(count)
-            .Select(g => g.CityId)
-            .ToListAsync(cancellationToken);
+       .GroupBy(b => b.Hotel.CityId)
+       .Select(g => new { CityId = g.Key, BookingCount = g.Count() })
+       .OrderByDescending(g => g.BookingCount)
+       .Take(count)
+       .ToListAsync(cancellationToken); 
 
         var mostVisitedCities = await context.Cities
-            .Where(c => mostVisitedCityIds.Contains(c.Id))
+            .Where(c => mostVisitedCityIds.Select(g => g.CityId).Contains(c.Id))
             .Include(c => c.Thumbnail)
             .AsNoTracking()
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken); 
 
         return mostVisitedCities;
     }
