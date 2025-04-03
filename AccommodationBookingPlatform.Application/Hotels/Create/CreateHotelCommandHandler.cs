@@ -1,3 +1,4 @@
+using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
 using AccommodationBookingPlatform.Domain.Entities;
 using AutoMapper;
 using Domain.Exceptions;

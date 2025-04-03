@@ -2,6 +2,7 @@
 using AccommodationBookingPlatform.Application.Amenities.Common;
 using AccommodationBookingPlatform.Domain.Entities;
 using AccommodationBookingPlatform.Domain.Enums;
+using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
 using AccommodationBookingPlatform.Domain.Models;
 using AutoMapper;
 using Domain.Interfaces.Persistence.Repositories;

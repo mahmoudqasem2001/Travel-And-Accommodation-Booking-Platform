@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using Domain.Interfaces.Persistence.Repositories;
+﻿using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
+using AutoMapper;
 using MediatR;
 
 namespace AccommodationBookingPlatform.Application.Cities.GetTrending;

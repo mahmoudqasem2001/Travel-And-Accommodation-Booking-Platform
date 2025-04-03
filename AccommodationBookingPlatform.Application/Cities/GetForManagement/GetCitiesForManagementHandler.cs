@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
+using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
 using AccommodationBookingPlatform.Domain.Entities;
 using AccommodationBookingPlatform.Domain.Enums;
 using AccommodationBookingPlatform.Domain.Models;
 using AutoMapper;
-using Domain.Interfaces.Persistence.Repositories;
 using MediatR;
 
 

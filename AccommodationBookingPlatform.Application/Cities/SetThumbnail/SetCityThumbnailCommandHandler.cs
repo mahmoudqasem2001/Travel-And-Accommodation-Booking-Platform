@@ -1,4 +1,5 @@
-﻿using AccommodationBookingPlatform.Domain.Enums;
+﻿using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
+using AccommodationBookingPlatform.Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces.Persistence;
 using Domain.Interfaces.Persistence.Repositories;
