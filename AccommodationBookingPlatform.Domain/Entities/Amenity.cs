@@ -1,4 +1,6 @@
-﻿namespace AccommodationBookingPlatform.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AccommodationBookingPlatform.Domain.Entities
 {
     public class Amenity : EntityBase
     {
