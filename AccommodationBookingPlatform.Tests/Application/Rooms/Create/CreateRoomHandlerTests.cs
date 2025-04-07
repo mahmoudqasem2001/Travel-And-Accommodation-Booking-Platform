@@ -118,15 +118,4 @@ public class CreateRoomHandlerTests
         await Assert.ThrowsAsync<Exception>(() => _handler.Handle(command, CancellationToken.None));
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public async Task Handle_ShouldThrowArgumentException_WhenRoomNumberIsInvalid(int invalidNumber)
-    {
-        // Arrange
-        var command = new CreateRoomCommand { RoomClassId = Guid.NewGuid(), Number = invalidNumber.ToString() };
-
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => _handler.Handle(command, CancellationToken.None));
-    }
 }

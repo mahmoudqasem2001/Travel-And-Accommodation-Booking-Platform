@@ -2,6 +2,7 @@
 
 using AccommodationBookingPlatform.Application.Users.Login;
 using AccommodationBookingPlatform.Domain.Entities;
+using AccommodationBookingPlatform.Domain.Interfaces.Auth;
 using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
 using AccommodationBookingPlatform.Infrastructure.Auth.Jwt;
 using Application.Users.Login;
@@ -18,14 +19,14 @@ namespace AccommodationBookingPlatform.Tests.Application.Users.Login
     public class LoginCommandHandlerTests
     {
         private readonly Mock<IUserRepository> _userRepositoryMock;
-        private readonly Mock<JwtTokenGenerator> _jwtTokenGeneratorMock;
+        private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly LoginCommandHandler _handler;
 
         public LoginCommandHandlerTests()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-            _jwtTokenGeneratorMock = new Mock<JwtTokenGenerator>();
+            _jwtTokenGeneratorMock = new Mock<IJwtTokenGenerator>();
             _mapperMock = new Mock<IMapper>();
 
             _handler = new LoginCommandHandler(

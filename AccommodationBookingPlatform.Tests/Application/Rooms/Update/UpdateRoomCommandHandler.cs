@@ -137,8 +137,8 @@ public class UpdateRoomCommandHandlerTests
             .Returns(Task.CompletedTask);
 
         _unitOfWorkMock
-            .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns((Task<int>)Task.CompletedTask);
+      .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
+      .ReturnsAsync(1);
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
