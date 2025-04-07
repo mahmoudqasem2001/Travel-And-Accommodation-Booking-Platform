@@ -122,8 +122,8 @@ public class GetRoomsHandlerTests
 
         // Assert
         Assert.Equal(2, result.Items.Count());
-        Assert.Equal("101", result.Items.ToList()[0].ToString());
-        Assert.Equal("102", result.Items.ToList()[1].ToString());
+        Assert.Equal("101", result.Items.ToList()[0].Number);
+        Assert.Equal("102", result.Items.ToList()[1].Number);
     }
 }
 
