@@ -15,7 +15,7 @@ public class UserRepositoryTests
     public UserRepositoryTests()
     {
         var options = new DbContextOptionsBuilder<HotelBookingDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb")  
+            .UseInMemoryDatabase(databaseName: "TestDb")
             .Options;
 
         _context = new HotelBookingDbContext(options);
@@ -27,13 +27,21 @@ public class UserRepositoryTests
     public async Task AuthenticateAsync_ValidCredentials_ReturnsUser()
     {
         // Arrange
-        var user = new User { Id = Guid.NewGuid(), Email = "test@example.com", Password = "hashedPassword" };
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@example.com",
+            Password = "hashedPassword",
+            FirstName = "John",
+            LastName = "Doe"
+        };
+
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
         _passwordHasherMock
-            .Setup(ph => ph.VerifyHashedPassword(user, user.Password, "validPassword"))
-            .Returns(PasswordVerificationResult.Success);
+      .Setup(ph => ph.VerifyHashedPassword(It.IsAny<User>(), "hashedPassword", "validPassword"))
+      .Returns(PasswordVerificationResult.Success);
 
         // Act
         var result = await _userRepository.AuthenticateAsync("test@example.com", "validPassword");
@@ -47,7 +55,15 @@ public class UserRepositoryTests
     public async Task AuthenticateAsync_InvalidCredentials_ReturnsNull()
     {
         // Arrange
-        var user = new User { Id = Guid.NewGuid(), Email = "test@example.com", Password = "hashedPassword" };
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@example.com",
+            Password = "hashedPassword",
+            FirstName = "Jane",
+            LastName = "Smith"
+        };
+
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
@@ -66,7 +82,15 @@ public class UserRepositoryTests
     public async Task CreateAsync_ValidUser_HashesPasswordAndAddsToDatabase()
     {
         // Arrange
-        var user = new User { Id = Guid.NewGuid(), Email = "test@example.com", Password = "plainPassword" };
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@example.com",
+            Password = "plainPassword",
+            FirstName = "Alice",
+            LastName = "Wonder"
+        };
+
         _passwordHasherMock.Setup(ph => ph.HashPassword(user, "plainPassword")).Returns("hashedPassword");
 
         // Act
@@ -83,7 +107,14 @@ public class UserRepositoryTests
     public async Task ExistsByEmailAsync_EmailExists_ReturnsTrue()
     {
         // Arrange
-        var user = new User { Id = Guid.NewGuid(), Email = "exists@example.com" };
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "exists@example.com",
+            Password = "somePassword",
+            FirstName = "Test",
+            LastName = "User"
+        };
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
@@ -103,12 +134,18 @@ public class UserRepositoryTests
         // Assert
         Assert.False(result);
     }
-
     [Fact]
     public async Task ExistsByIdAsync_IdExists_ReturnsTrue()
     {
         // Arrange
-        var user = new User { Id = Guid.NewGuid(), Email = "test@example.com" };
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@example.com",
+            Password = "somePassword",
+            FirstName = "Test",
+            LastName = "User"
+        };
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
@@ -119,11 +156,19 @@ public class UserRepositoryTests
         Assert.True(result);
     }
 
+
     [Fact]
     public async Task GetByIdAsync_ValidId_ReturnsUser()
     {
         // Arrange
-        var user = new User { Id = Guid.NewGuid(), Email = "test@example.com" };
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "test@example.com",
+            Password = "somePassword",
+            FirstName = "Test",
+            LastName = "User"
+        };
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
@@ -134,4 +179,5 @@ public class UserRepositoryTests
         Assert.NotNull(result);
         Assert.Equal(user.Email, result.Email);
     }
+
 }
