@@ -1,124 +1,135 @@
-﻿using System.Linq.Expressions;
 using AccommodationBookingPlatform.Domain.Entities;
+using AccommodationBookingPlatform.Domain.Enums;
 using AccommodationBookingPlatform.Domain.Models;
-using AccommodationBookingPlatform.Infrastructure.Presistence.DbContexts;
-using AccommodationBookingPlatform.Infrastructure.Presistence.Extensions;
-using AccommodationBookingPlatform.Infrastructure.Presistence.Helpers;
+using AccommodationBookingPlatform.Infrastructure.Presistence.Repositories;
+using AccommodationBookingPlatform.Tests.Common;
 using Domain.Exceptions;
-using Domain.Interfaces.Persistence.Repositories;
-using Domain.Messages;
-using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccommodationBookingPlatform.Tests.Infrastructure.Persistence
+namespace AccommodationBookingPlatform.Tests.Infrastructure.Persistence;
+
+public class RoomRepositoryTests
 {
-    public class RoomRepository : IRoomRepository
+    private readonly InMemoryDbContextFactory _dbContextFactory = new();
+
+    [Fact]
+    public async Task ExistsAsync_WhenRoomMatchesPredicate_ReturnsTrue()
     {
-        private readonly HotelBookingDbContext context;
+        using var context = _dbContextFactory.CreateContext();
+        var roomClass = EntityFactory.CreateRoomClass();
+        var existingRoom = EntityFactory.CreateRoom(roomClass);
+        context.RoomClasses.Add(roomClass);
+        context.Rooms.Add(existingRoom);
+        await context.SaveChangesAsync();
 
-        public RoomRepository(HotelBookingDbContext context)
+        var repository = new RoomRepository(context);
+
+        var result = await repository.ExistsAsync(r => r.Number == existingRoom.Number);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task GetForManagementAsync_ProjectsAvailabilityAndPagination()
+    {
+        using var context = _dbContextFactory.CreateContext();
+        var roomClass = EntityFactory.CreateRoomClass();
+        var unavailableRoom = EntityFactory.CreateRoom(roomClass, "201");
+        var availableRoom = EntityFactory.CreateRoom(roomClass, "202");
+        var activeBooking = EntityFactory.CreateBooking(roomClass.Hotel,
+            checkIn: DateOnly.FromDateTime(DateTime.UtcNow),
+            checkOut: DateOnly.FromDateTime(DateTime.UtcNow));
+        activeBooking.Rooms.Add(unavailableRoom);
+        unavailableRoom.Bookings.Add(activeBooking);
+
+        context.AddRange(roomClass.Hotel.City, roomClass.Hotel.Owner, roomClass.Hotel, roomClass);
+        context.Rooms.AddRange(unavailableRoom, availableRoom);
+        context.Bookings.Add(activeBooking);
+        await context.SaveChangesAsync();
+
+        var repository = new RoomRepository(context);
+        var query = new Query<Room>(r => true, SortOrder.Ascending, "number", pageNumber: 1, pageSize: 10);
+
+        var pagedRooms = await repository.GetForManagementAsync(query);
+
+        Assert.Equal(2, pagedRooms.Items.Count());
+        var unavailableProjection = pagedRooms.Items.Single(r => r.Number == "201");
+        Assert.False(unavailableProjection.IsAvailable);
+        var availableProjection = pagedRooms.Items.Single(r => r.Number == "202");
+        Assert.True(availableProjection.IsAvailable);
+        Assert.Equal(2, pagedRooms.PaginationMetadata.TotalItemCount);
+    }
+
+    [Fact]
+    public async Task GetByIdWithRoomClassAsync_ReturnsRoomWithOnlyActiveDiscounts()
+    {
+        using var context = _dbContextFactory.CreateContext();
+        var roomClass = EntityFactory.CreateRoomClass();
+        var room = EntityFactory.CreateRoom(roomClass);
+        var activeDiscount = new Discount
         {
-            this.context = context;
-        }
-
-        public async Task<bool> ExistsAsync(Expression<Func<Room, bool>> predicate, CancellationToken cancellationToken = default)
+            Id = Guid.NewGuid(),
+            RoomClass = roomClass,
+            RoomClassId = roomClass.Id,
+            StartDateUtc = DateTime.UtcNow.AddDays(-1),
+            EndDateUtc = DateTime.UtcNow.AddDays(1),
+            Percentage = 10,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+        var expiredDiscount = new Discount
         {
-            return await context.Rooms.AnyAsync(predicate, cancellationToken);
-        }
+            Id = Guid.NewGuid(),
+            RoomClass = roomClass,
+            RoomClassId = roomClass.Id,
+            StartDateUtc = DateTime.UtcNow.AddDays(-10),
+            EndDateUtc = DateTime.UtcNow.AddDays(-5),
+            Percentage = 5,
+            CreatedAtUtc = DateTime.UtcNow.AddDays(-10)
+        };
+        roomClass.Discounts.Add(activeDiscount);
+        roomClass.Discounts.Add(expiredDiscount);
 
-        public async Task<PaginatedList<RoomForManagement>> GetForManagementAsync(Query<Room> query, CancellationToken cancellationToken = default)
-        {
-            var currentDateUtc = DateOnly.FromDateTime(DateTime.UtcNow);
+        context.AddRange(roomClass.Hotel.City, roomClass.Hotel.Owner, roomClass.Hotel, roomClass, room);
+        context.Discounts.AddRange(activeDiscount, expiredDiscount);
+        await context.SaveChangesAsync();
 
-            var queryable = context.Rooms.AsQueryable()
-                .Where(query.Filter)
-                .Sort(SortingExpressions.GetRoomSortExpression(query.SortColumn), query.SortOrder);
+        var repository = new RoomRepository(context);
 
-            var projectedQueryable = queryable
-                .Select(r => new RoomForManagement
-                {
-                    Id = r.Id,
-                    RoomClassId = r.RoomClassId,
-                    Number = r.Number,
-                    IsAvailable = !r.Bookings.Any(
-                        b => b.CheckInDateUtc >= currentDateUtc && b.CheckOutDateUtc <= currentDateUtc),
-                    CreatedAtUtc = r.CreatedAtUtc,
-                    ModifiedAtUtc = r.ModifiedAtUtc
-                });
+        var result = await repository.GetByIdWithRoomClassAsync(room.Id);
 
-            var itemsToReturn = await projectedQueryable
-                .GetPage(query.PageNumber, query.PageSize)
-                .ToListAsync(cancellationToken);
+        Assert.NotNull(result);
+        Assert.NotNull(result!.RoomClass);
+        Assert.Single(result.RoomClass.Discounts);
+        Assert.Equal(activeDiscount.Id, result.RoomClass.Discounts.Single().Id);
+    }
 
-            var metadata = await projectedQueryable.GetPaginationMetadataAsync(query.PageNumber, query.PageSize);
+    [Fact]
+    public async Task UpdateAsync_WhenRoomDoesNotExist_ThrowsNotFoundException()
+    {
+        using var context = _dbContextFactory.CreateContext();
+        IRoomRepository repository = new RoomRepository(context);
+        var detachedRoom = EntityFactory.CreateRoom();
 
-            return new PaginatedList<RoomForManagement>(itemsToReturn, metadata);
-        }
+        var action = () => repository.UpdateAsync(detachedRoom);
 
+        await Assert.ThrowsAsync<NotFoundException>(action);
+    }
 
-        public async Task<Room?> GetByIdAsync(Guid roomClassId, Guid id, CancellationToken cancellationToken = default)
-        {
-            return await context.Rooms
-                .FirstOrDefaultAsync(r => r.Id == id && r.RoomClassId == roomClassId, cancellationToken);
-        }
+    [Fact]
+    public async Task DeleteAsync_RemovesRoomWhenExists()
+    {
+        using var context = _dbContextFactory.CreateContext();
+        var roomClass = EntityFactory.CreateRoomClass();
+        var room = EntityFactory.CreateRoom(roomClass);
+        context.AddRange(roomClass.Hotel.City, roomClass.Hotel.Owner, roomClass.Hotel, roomClass, room);
+        await context.SaveChangesAsync();
 
-        public async Task<Room> CreateAsync(Room room, CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(room);
+        IRoomRepository repository = new RoomRepository(context);
 
-            var createdRoom = await context.Rooms.AddAsync(room, cancellationToken);
+        await repository.DeleteAsync(room.Id);
+        await context.SaveChangesAsync();
 
-            return createdRoom.Entity;
-        }
-
-        public async Task UpdateAsync(Room room, CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(room);
-
-            if (!await context.Rooms.AnyAsync(r => r.Id == room.Id, cancellationToken))
-                throw new NotFoundException(RoomMessages.NotFound);
-
-            context.Rooms.Update(room);
-        }
-
-        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            if (!await context.Rooms.AnyAsync(r => r.Id == id, cancellationToken))
-            {
-                throw new NotFoundException(RoomMessages.NotFound);
-            }
-
-            var roomEntity = context.ChangeTracker.Entries<Room>()
-                .FirstOrDefault(e => e.Entity.Id == id)?.Entity
-                ?? new Room { Id = id };
-
-            context.Rooms.Remove(roomEntity);
-        }
-
-        public async Task<PaginatedList<Room>> GetAsync(Query<Room> query, CancellationToken cancellationToken = default)
-        {
-            var queryable = context.Rooms
-                .Where(query.Filter)
-                .Sort(r => r.Id, query.SortOrder);
-
-            var itemsToReturn = await queryable
-                .GetPage(query.PageNumber, query.PageSize)
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-
-            var metadata = await queryable.GetPaginationMetadataAsync(query.PageNumber, query.PageSize);
-
-            return new PaginatedList<Room>(itemsToReturn, metadata);
-        }
-
-        public async Task<Room?> GetByIdWithRoomClassAsync(Guid roomId, CancellationToken cancellationToken = default)
-        {
-            var currentDateTime = DateTime.UtcNow;
-
-            return await context.Rooms
-                .Include(r => r.RoomClass)
-                .ThenInclude(rc => rc.Discounts.Where(d => d.StartDateUtc <= currentDateTime && d.EndDateUtc > currentDateTime))
-                .FirstOrDefaultAsync(r => r.Id == roomId, cancellationToken);
-        }
+        var remainingRooms = await context.Rooms.ToListAsync();
+        Assert.Empty(remainingRooms);
     }
 }

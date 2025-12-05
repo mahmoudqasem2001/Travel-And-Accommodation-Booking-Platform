@@ -1,183 +1,124 @@
-﻿using AccommodationBookingPlatform.Domain.Entities;
-using AccommodationBookingPlatform.Infrastructure.Presistence.DbContexts;
+using AccommodationBookingPlatform.Domain.Entities;
 using AccommodationBookingPlatform.Infrastructure.Presistence.Repositories;
+using AccommodationBookingPlatform.Tests.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Xunit;
+
+namespace AccommodationBookingPlatform.Tests.Infrastructure.Persistence;
 
 public class UserRepositoryTests
 {
-    private readonly HotelBookingDbContext _context;
-    private readonly Mock<IPasswordHasher<User>> _passwordHasherMock;
-    private readonly UserRepository _userRepository;
-
-    public UserRepositoryTests()
-    {
-        var options = new DbContextOptionsBuilder<HotelBookingDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb")
-            .Options;
-
-        _context = new HotelBookingDbContext(options);
-        _passwordHasherMock = new Mock<IPasswordHasher<User>>();
-        _userRepository = new UserRepository(_context, _passwordHasherMock.Object);
-    }
+    private readonly InMemoryDbContextFactory _dbContextFactory = new();
+    private readonly Mock<IPasswordHasher<User>> _passwordHasherMock = new();
 
     [Fact]
     public async Task AuthenticateAsync_ValidCredentials_ReturnsUser()
     {
-        // Arrange
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = "test@example.com",
-            Password = "hashedPassword",
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        using var context = _dbContextFactory.CreateContext();
+        var repository = new UserRepository(context, _passwordHasherMock.Object);
+        var user = EntityFactory.CreateUser(email: "test@example.com");
+        user.Password = "hashedPassword";
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
         _passwordHasherMock
-      .Setup(ph => ph.VerifyHashedPassword(It.IsAny<User>(), "hashedPassword", "validPassword"))
-      .Returns(PasswordVerificationResult.Success);
+            .Setup(ph => ph.VerifyHashedPassword(user, "hashedPassword", "validPassword"))
+            .Returns(PasswordVerificationResult.Success);
 
-        // Act
-        var result = await _userRepository.AuthenticateAsync("test@example.com", "validPassword");
+        var result = await repository.AuthenticateAsync("test@example.com", "validPassword");
 
-        // Assert
         Assert.NotNull(result);
-        Assert.Equal(user.Email, result.Email);
+        Assert.Equal(user.Email, result!.Email);
     }
 
     [Fact]
     public async Task AuthenticateAsync_InvalidCredentials_ReturnsNull()
     {
-        // Arrange
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = "test@example.com",
-            Password = "hashedPassword",
-            FirstName = "Jane",
-            LastName = "Smith"
-        };
-
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        using var context = _dbContextFactory.CreateContext();
+        var repository = new UserRepository(context, _passwordHasherMock.Object);
+        var user = EntityFactory.CreateUser(email: "test@example.com");
+        user.Password = "hashedPassword";
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
         _passwordHasherMock
             .Setup(ph => ph.VerifyHashedPassword(user, user.Password, "wrongPassword"))
             .Returns(PasswordVerificationResult.Failed);
 
-        // Act
-        var result = await _userRepository.AuthenticateAsync("test@example.com", "wrongPassword");
+        var result = await repository.AuthenticateAsync("test@example.com", "wrongPassword");
 
-        // Assert
         Assert.Null(result);
     }
 
     [Fact]
     public async Task CreateAsync_ValidUser_HashesPasswordAndAddsToDatabase()
     {
-        // Arrange
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = "test@example.com",
-            Password = "plainPassword",
-            FirstName = "Alice",
-            LastName = "Wonder"
-        };
-
+        using var context = _dbContextFactory.CreateContext();
+        var repository = new UserRepository(context, _passwordHasherMock.Object);
+        var user = EntityFactory.CreateUser(email: "test@example.com");
+        user.Password = "plainPassword";
         _passwordHasherMock.Setup(ph => ph.HashPassword(user, "plainPassword")).Returns("hashedPassword");
 
-        // Act
-        await _userRepository.CreateAsync(user);
-        await _context.SaveChangesAsync();
+        await repository.CreateAsync(user);
+        await context.SaveChangesAsync();
 
-        // Assert
-        var storedUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == "test@example.com");
+        var storedUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "test@example.com");
         Assert.NotNull(storedUser);
-        Assert.Equal("hashedPassword", storedUser.Password);
+        Assert.Equal("hashedPassword", storedUser!.Password);
     }
 
     [Fact]
     public async Task ExistsByEmailAsync_EmailExists_ReturnsTrue()
     {
-        // Arrange
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = "exists@example.com",
-            Password = "somePassword",
-            FirstName = "Test",
-            LastName = "User"
-        };
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        using var context = _dbContextFactory.CreateContext();
+        var repository = new UserRepository(context, _passwordHasherMock.Object);
+        var user = EntityFactory.CreateUser(email: "exists@example.com");
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
-        // Act
-        var result = await _userRepository.ExistsByEmailAsync("exists@example.com");
+        var result = await repository.ExistsByEmailAsync("exists@example.com");
 
-        // Assert
         Assert.True(result);
     }
 
     [Fact]
     public async Task ExistsByEmailAsync_EmailDoesNotExist_ReturnsFalse()
     {
-        // Act
-        var result = await _userRepository.ExistsByEmailAsync("notfound@example.com");
+        using var context = _dbContextFactory.CreateContext();
+        var repository = new UserRepository(context, _passwordHasherMock.Object);
 
-        // Assert
+        var result = await repository.ExistsByEmailAsync("notfound@example.com");
+
         Assert.False(result);
     }
+
     [Fact]
     public async Task ExistsByIdAsync_IdExists_ReturnsTrue()
     {
-        // Arrange
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = "test@example.com",
-            Password = "somePassword",
-            FirstName = "Test",
-            LastName = "User"
-        };
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        using var context = _dbContextFactory.CreateContext();
+        var repository = new UserRepository(context, _passwordHasherMock.Object);
+        var user = EntityFactory.CreateUser();
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
-        // Act
-        var result = await _userRepository.ExistsByIdAsync(user.Id);
+        var result = await repository.ExistsByIdAsync(user.Id);
 
-        // Assert
         Assert.True(result);
     }
-
 
     [Fact]
     public async Task GetByIdAsync_ValidId_ReturnsUser()
     {
-        // Arrange
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = "test@example.com",
-            Password = "somePassword",
-            FirstName = "Test",
-            LastName = "User"
-        };
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
+        using var context = _dbContextFactory.CreateContext();
+        var repository = new UserRepository(context, _passwordHasherMock.Object);
+        var user = EntityFactory.CreateUser();
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
-        // Act
-        var result = await _userRepository.GetByIdAsync(user.Id);
+        var result = await repository.GetByIdAsync(user.Id);
 
-        // Assert
         Assert.NotNull(result);
-        Assert.Equal(user.Email, result.Email);
+        Assert.Equal(user.Email, result!.Email);
     }
-
 }

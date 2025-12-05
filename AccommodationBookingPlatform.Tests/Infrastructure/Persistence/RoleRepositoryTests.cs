@@ -1,51 +1,38 @@
-﻿using AccommodationBookingPlatform.Domain.Entities;
-using AccommodationBookingPlatform.Domain.Interfaces.Persistence.Repositories;
-using AccommodationBookingPlatform.Infrastructure.Presistence.DbContexts;
-using Infrastructure.Persistence.Repositories;
+using AccommodationBookingPlatform.Domain.Entities;
+using AccommodationBookingPlatform.Infrastructure.Presistence.Repositories;
+using AccommodationBookingPlatform.Tests.Common;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
-namespace AccommodationBookingPlatform.Tests.Infrastructure.Persistence
+namespace AccommodationBookingPlatform.Tests.Infrastructure.Persistence;
+
+public class RoleRepositoryTests
 {
-    public class RoleRepositoryTests
+    private readonly InMemoryDbContextFactory _dbContextFactory = new();
+
+    [Fact]
+    public async Task GetByNameAsync_ValidName_ReturnsRole()
     {
-        private readonly HotelBookingDbContext _context;
-        private readonly IRoleRepository _roleRepository;
+        using var context = _dbContextFactory.CreateContext();
+        var role = new Role { Name = "Admin" };
+        context.Roles.Add(role);
+        await context.SaveChangesAsync();
 
-        public RoleRepositoryTests()
-        {
-            var options = new DbContextOptionsBuilder<HotelBookingDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDb")
-                .Options;
+        var repository = new RoleRepository(context);
 
-            _context = new HotelBookingDbContext(options);
-            _roleRepository = new RoleRepository(_context);
-        }
+        var result = await repository.GetByNameAsync("Admin");
 
-        [Fact]
-        public async Task GetByNameAsync_ValidName_ReturnsRole()
-        {
-            // Arrange
-            var role = new Role { Name = "Admin" };
-            await _context.Roles.AddAsync(role);
-            await _context.SaveChangesAsync();
+        Assert.NotNull(result);
+        Assert.Equal("Admin", result!.Name);
+    }
 
-            // Act
-            var result = await _roleRepository.GetByNameAsync("Admin");
+    [Fact]
+    public async Task GetByNameAsync_InvalidName_ReturnsNull()
+    {
+        using var context = _dbContextFactory.CreateContext();
+        var repository = new RoleRepository(context);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal("Admin", result.Name);
-        }
+        var result = await repository.GetByNameAsync("NonExistentRole");
 
-        [Fact]
-        public async Task GetByNameAsync_InvalidName_ReturnsNull()
-        {
-            // Act
-            var result = await _roleRepository.GetByNameAsync("NonExistentRole");
-
-            // Assert
-            Assert.Null(result);
-        }
+        Assert.Null(result);
     }
 }
