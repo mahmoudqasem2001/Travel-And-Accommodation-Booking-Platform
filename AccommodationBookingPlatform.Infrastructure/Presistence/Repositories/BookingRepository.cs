@@ -40,13 +40,13 @@ public class BookingRepository(HotelBookingDbContext context) : IBookingReposito
       bool includeInvoice = false,
       CancellationToken cancellationToken = default)
     {
-        var bookings = context.Bookings
+        IQueryable<Booking> bookings = context.Bookings
           .Where(b => b.Id == id && b.GuestId == guestId)
           .Include(b => b.Hotel);
 
         if (includeInvoice)
         {
-            bookings.Include(b => b.Invoice);
+            bookings = bookings.Include(b => b.Invoice);
         }
 
         return await bookings.FirstOrDefaultAsync(cancellationToken);
